@@ -1,0 +1,1876 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Budget</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0C0C0F;
+    --bg2: #141417;
+    --bg3: #1C1C21;
+    --bg4: #242429;
+    --border: rgba(255,255,255,0.07);
+    --text: #F5F5F7;
+    --text2: #8E8E99;
+    --text3: #48484E;
+    --green: #30D158;
+    --green-border: rgba(48,209,88,0.25);
+    --red: #FF453A;
+    --red-bg: rgba(255,69,58,0.12);
+    --red-border: rgba(255,69,58,0.25);
+    --gold: #FFD60A;
+    --blue: #0A84FF;
+    --purple: #BF5AF2;
+    --purple-border: rgba(191,90,242,0.3);
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Outfit', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  h1 {
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: var(--blue);
+  }
+
+  .edit-icon {
+    width: 28px; height: 28px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  .edit-icon:hover { background: var(--bg4); }
+
+  .confirm-btn {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border: none; border-radius: 10px;
+    color: white; font-size: 16px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .confirm-btn:hover { opacity: 0.85; }
+
+  /* STAT CARDS */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s;
+  }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    opacity: 0.06;
+  }
+  .stat-card.green { border-color: var(--green-border); }
+  .stat-card.green::after { background: var(--green); }
+  .stat-card.gold { border-color: rgba(255,214,10,0.4); border-width: 2px; }
+  .stat-card.gold::after { background: var(--gold); }
+  .stat-card.purple { border-color: var(--red-border); border-width: 2px; }
+  .stat-card.purple::after { background: var(--red); }
+
+  .stat-label {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+  }
+
+  .stat-amount {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .list-title {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .list-badge {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+  }
+
+  /* TWO COLUMNS for lists */
+  .lists-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  /* EXPENSE ITEMS */
+  .expense-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.12s, opacity 0.12s;
+    animation: fadeUp 0.3s ease both;
+  }
+  .expense-item:hover { transform: translateX(3px); }
+  .expense-item:active { opacity: 0.8; }
+
+  .expense-item.paid-fixed   { border-color: var(--green-border); background: linear-gradient(135deg, var(--bg3), rgba(48,209,88,0.05)); }
+  .expense-item.unpaid-fixed { border-color: rgba(255,214,10,0.3); background: linear-gradient(135deg, var(--bg3), rgba(255,214,10,0.05)); }
+  .expense-item.paid-var     { border-color: var(--purple-border); background: linear-gradient(135deg, var(--bg3), rgba(191,90,242,0.05)); }
+  .expense-item.unpaid-var   { border-color: var(--red-border); background: linear-gradient(135deg, var(--bg3), rgba(255,69,58,0.05)); }
+
+  .check-btn {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: white;
+    transition: all 0.2s;
+  }
+  .paid-fixed   .check-btn { border-color: var(--green);  background: var(--green); }
+  .unpaid-fixed .check-btn { border-color: rgba(255,214,10,0.4); background: transparent; }
+  .paid-var     .check-btn { border-color: var(--purple); background: var(--purple); }
+  .unpaid-var   .check-btn { border-color: rgba(255,69,58,0.4); background: transparent; }
+
+  .expense-info { flex: 1; min-width: 0; }
+  .expense-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .expense-status { font-size: 11px; font-weight: 500; margin-top: 2px; }
+
+  .paid-fixed   .expense-name   { color: var(--green); }
+  .unpaid-fixed .expense-name   { color: var(--gold); }
+  .paid-var     .expense-name   { color: var(--purple); }
+  .unpaid-var   .expense-name   { color: var(--red); }
+
+  .paid-fixed   .expense-status { color: rgba(48,209,88,0.55); }
+  .unpaid-fixed .expense-status { color: rgba(255,214,10,0.55); }
+  .paid-var     .expense-status { color: rgba(191,90,242,0.55); }
+  .unpaid-var   .expense-status { color: rgba(255,69,58,0.55); }
+
+  .expense-amount { font-size: 15px; font-weight: 700; flex-shrink: 0; }
+  .paid-fixed   .expense-amount { color: var(--green); }
+  .unpaid-fixed .expense-amount { color: var(--gold); }
+  .paid-var     .expense-amount { color: var(--purple); }
+  .unpaid-var   .expense-amount { color: var(--red); }
+
+  .del-btn {
+    width: 26px; height: 26px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    color: var(--text3);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .del-btn:hover { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .expense-item.paid-fixed .del-btn:hover, .expense-item.unpaid-fixed .del-btn:hover { background: rgba(255,214,10,0.12); color: var(--gold); border-color: rgba(255,214,10,0.4); }
+
+  /* ADD FORM */
+  .add-section {
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+
+  .add-title {
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .add-row { display: flex; gap: 10px; margin-bottom: 10px; }
+
+  .add-input {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    border: 1.5px solid var(--bg4);
+    border-radius: 12px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 500;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .add-input:focus { border-color: rgba(10,132,255,0.5); }
+  .add-input::placeholder { color: var(--text3); }
+  .add-input.name-input { flex: 1; }
+  .add-input.amount-input { width: 130px; }
+
+  .add-btn {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 13px;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .add-btn:hover { opacity: 0.9; }
+  .add-btn:active { transform: scale(0.99); }
+  .add-btn.fixed { background: var(--red); }
+  .add-btn.variable { background: var(--red); }
+
+  .empty {
+    text-align: center;
+    padding: 32px 0;
+    color: var(--text3);
+    font-size: 14px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 10px;
+    max-width: 1100px;
+    margin: 0 auto 24px;
+  }
+
+  .tab {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 24px;
+    color: var(--text2);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .tab:hover { background: var(--bg3); color: var(--text); }
+  .tab.active { background: var(--blue); border-color: var(--blue); color: white; }
+
+
+  /* BLUR / LOCK */
+  .blurred { filter: blur(8px); user-select: none; pointer-events: none; transition: filter 0.3s; }
+  .lock-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(4px);
+  }
+  .lock-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 36px 40px;
+    text-align: center;
+    width: 320px;
+  }
+  .lock-box h2 { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .lock-box p  { font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+  .lock-icon   { font-size: 40px; margin-bottom: 16px; }
+  .pin-input {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--bg4);
+    border-radius: 14px;
+    padding: 14px;
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 8px;
+    text-align: center;
+    outline: none;
+    margin-bottom: 14px;
+    transition: border-color 0.2s;
+  }
+  .pin-input:focus { border-color: var(--blue); }
+  .pin-input.error { border-color: var(--red); animation: shake 0.3s ease; }
+  .unlock-btn {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: var(--blue);
+    border: none;
+    border-radius: 14px;
+    padding: 14px;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+  }
+  .unlock-btn:hover { opacity: 0.9; }
+  .demo-btn {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .demo-btn:hover { background: var(--bg3); color: var(--text); }
+  .error-msg { color: var(--red); font-size: 13px; margin-top: 6px; min-height: 18px; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+
+  /* SETTINGS BUTTON */
+  .settings-btn {
+    width: 34px; height: 34px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.3s;
+    flex-shrink: 0;
+  }
+  .settings-btn:hover { background: var(--bg4); transform: rotate(45deg); }
+
+  /* SETTINGS MODAL */
+  .settings-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(4px);
+  }
+  .settings-overlay.open { display: flex; }
+  .settings-box {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px 36px;
+    text-align: center;
+    width: 320px;
+  }
+  .settings-box h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  .settings-box .sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+  .settings-input {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: var(--bg);
+    border: 1.5px solid var(--bg4);
+    border-radius: 14px;
+    padding: 12px;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 6px;
+    text-align: center;
+    outline: none;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .settings-input:focus { border-color: var(--blue); }
+  .settings-input.ok    { border-color: var(--green); }
+  .settings-input.error { border-color: var(--red); animation: shake 0.3s ease; }
+  .settings-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: left;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .settings-save-btn {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: var(--blue);
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 6px;
+    margin-bottom: 10px;
+  }
+  .settings-save-btn:hover { opacity: 0.9; }
+  .settings-cancel-btn {
+    font-family: 'Outfit', sans-serif;
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 11px;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .settings-cancel-btn:hover { background: var(--bg3); color: var(--text); }
+  .settings-success { color: var(--green); font-size: 13px; margin-top: 6px; min-height: 18px; }
+  .settings-err     { color: var(--red);   font-size: 13px; margin-top: 6px; min-height: 18px; }
+
+  /* GOOGLE DRIVE SYNC */
+  .sync-bar {
+    max-width: 1100px;
+    margin: 0 auto 10px;
+    display: none;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .sync-status {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text3);
+    transition: background 0.3s;
+  }
+  .sync-dot.syncing  { background: var(--gold); animation: pulse 1s infinite; }
+  .sync-dot.synced   { background: var(--green); }
+  .sync-dot.error    { background: var(--red); }
+  .gdrive-btn {
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 8px 16px;
+    color: var(--text2);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .gdrive-btn:hover { background: var(--bg3); color: var(--text); }
+  .gdrive-btn.connected { border-color: rgba(48,209,88,0.3); color: var(--green); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* TOAST NOTIFICATIONS */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    z-index: 999;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    white-space: nowrap;
+    max-width: 90vw;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.success { border-color: var(--green-border); color: var(--green); }
+  .toast.error   { border-color: var(--red-border);   color: var(--red); }
+  .toast.info    { border-color: rgba(10,132,255,0.4); color: var(--blue); }
+
+  .input-error {
+    border-color: var(--red) !important;
+    animation: shake 0.3s ease;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    body { padding: 16px 12px; }
+
+    h1 { font-size: 28px; }
+
+    .tabs {
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 8px;
+      font-size: 13px;
+      text-align: center;
+    }
+
+
+    .stats {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .stat-card { padding: 20px 18px; }
+    .stat-amount { font-size: 26px; }
+
+    .lists-grid {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .panel { padding: 16px; }
+
+    .add-row { flex-direction: column; }
+    .add-input.amount-input { width: 100%; }
+
+    .expense-item { padding: 12px 12px; }
+    .expense-name { font-size: 15px; }
+
+    .lock-box { width: 90%; padding: 28px 20px; }
+    .lock-box h2 { font-size: 20px; }
+
+    .salary-input { width: 130px; font-size: 20px; }
+  }
+
+</style>
+<script src="https://accounts.google.com/gsi/client"></script>
+</head>
+<body>
+
+<div class="lock-overlay" id="lock-overlay">
+  <div class="lock-box">
+    <div class="lock-icon">💰</div>
+    <h2>Gestion de Budget</h2>
+    <p>Entrez votre code personnel pour accéder à vos données</p>
+    <input class="pin-input" type="password" id="pin-input" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')tryUnlock()">
+    <div class="error-msg" id="pin-error"></div>
+    <button type="button" class="unlock-btn" onclick="tryUnlock()">Déverrouiller</button>
+    <button type="button" class="demo-btn" onclick="showDemo()">👁️ Voir la démo sans code</button>
+  </div>
+</div>
+
+<div class="sync-bar" id="sync-bar">
+  <div class="sync-status">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span id="sync-label">Non connecté</span>
+  </div>
+  <button type="button" class="gdrive-btn" id="gdrive-btn" onclick="gdriveAuth()">
+    <span>☁️</span> Connecter Google Drive
+  </button>
+  <button type="button" class="gdrive-btn" onclick="logoutApp()" title="Verrouiller et effacer la session" style="border-color:rgba(255,69,58,0.3)">
+    <span>🔒</span> Verrouiller
+  </button>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab active" id="tab-perso" onclick="switchTab('perso')">👤 Compte Yoann</button>
+  <button type="button" class="tab" id="tab-commun" onclick="switchTab('commun')">👫 Compte Patate & Piou</button>
+  <button type="button" class="tab" id="tab-marie" onclick="switchTab('marie')">👤 Compte Marie</button>
+  <button type="button" class="tab" id="tab-demo" onclick="switchTab('demo')">👁️ Démo</button>
+</div>
+
+<div id="page-perso" class="blur-target">
+<div class="app">
+
+  <!-- TITRE -->
+  <div class="topbar">
+    <div>
+      <div class="title-row" id="title-display">
+        <h1 id="title-text">Compte Yoann</h1>
+        <div class="edit-icon" onclick="editTitle()">✏️</div>
+        <div class="settings-btn" onclick="openSettings('yoann')" title="Changer mon code">⚙️</div>
+      </div>
+      <div id="title-edit" style="display:none;align-items:center;gap:8px">
+        <input id="title-input" style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;background:var(--bg3);border:1.5px solid var(--blue);border-radius:10px;padding:6px 14px;color:var(--text);outline:none;width:280px;text-align:center" onkeydown="if(event.key==='Enter')confirmTitle()">
+        <button type="button" class="confirm-btn" onclick="confirmTitle()">✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 CARTES -->
+  <div class="stats">
+    <div class="stat-card green">
+      <p class="stat-label" style="color:var(--green)">Salaire</p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="salary-display" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="editSalary()">
+          <p class="stat-amount" id="salary-text" style="color:var(--green)">—</p>
+          <div class="edit-icon">✏️</div>
+        </div>
+        <div id="salary-edit" style="display:none;align-items:center;gap:8px">
+          <input style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;background:var(--bg3);border:1.5px solid var(--green);border-radius:10px;padding:6px 12px;color:var(--text);width:140px;outline:none" type="number" id="salary-input" value="1500" onkeydown="if(event.key==='Enter')confirmSalary()">
+          <button type="button" class="confirm-btn" onclick="confirmSalary()">✓</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card gold">
+      <p class="stat-label" style="color:var(--gold)">Argent restant après dépenses fixes</p>
+      <p class="stat-amount" id="remaining-fixed" style="color:var(--gold)">—</p>
+      <p class="stat-sub" style="color:rgba(255,214,10,0.5)">Total fixes : <span id="total-fixed">—</span></p>
+    </div>
+
+    <div class="stat-card purple">
+      <p class="stat-label" style="color:var(--red)">Argent restant après tout</p>
+      <p class="stat-amount" id="remaining-all" style="color:var(--red)">—</p>
+      <p class="stat-sub" style="color:rgba(255,69,58,0.5)">Total variables : <span id="total-var">—</span></p>
+    </div>
+  </div>
+
+  <!-- LISTES -->
+  <div class="panel">
+    <div class="lists-grid">
+
+      <!-- DÉPENSES FIXES -->
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--gold)">Dépenses fixes</span>
+          <span class="list-badge" id="badge-fixed">0 / 0</span>
+        </div>
+        <div id="list-fixed"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--gold)">Nouvelle dépense fixe</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-fixed" maxlength="50" placeholder="Ex : Loyer, EDF..." onkeydown="if(event.key==='Enter')addFixed()">
+            <input class="add-input amount-input" id="amount-fixed" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addFixed()">
+          </div>
+          <button type="button" class="add-btn fixed" style="background:var(--gold);color:#000" onclick="addFixed()">+ Ajouter dépense fixe</button>
+        </div>
+      </div>
+
+      <!-- DÉPENSES VARIABLES -->
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--red)">Dépenses variables</span>
+          <span class="list-badge" id="badge-var">0 / 0</span>
+        </div>
+        <div id="list-var"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--red)">Nouvelle dépense variable</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-var" maxlength="50" placeholder="Ex : Courses, Resto..." onkeydown="if(event.key==='Enter')addVar()">
+            <input class="add-input amount-input" id="amount-var" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addVar()">
+          </div>
+          <button type="button" class="add-btn variable" onclick="addVar()">+ Ajouter dépense variable</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="page-commun" style="display:none" class="blur-target">
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="title-row" id="title-display-c">
+        <h1 id="title-text-c">Compte Patate &amp; Piou</h1>
+        <div class="edit-icon" onclick="editTitleC()">✏️</div>
+      </div>
+      <div id="title-edit-c" style="display:none;align-items:center;gap:8px">
+        <input id="title-input-c" style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;background:var(--bg3);border:1.5px solid var(--blue);border-radius:10px;padding:6px 14px;color:var(--text);outline:none;width:280px;text-align:center" onkeydown="if(event.key==='Enter')confirmTitleC()">
+        <button type="button" class="confirm-btn" onclick="confirmTitleC()">✓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card green">
+      <p class="stat-label" style="color:var(--green)">Salaire</p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="salary-display-c" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="editSalaryC()">
+          <p class="stat-amount" id="salary-text-c" style="color:var(--green)">—</p>
+          <div class="edit-icon">✏️</div>
+        </div>
+        <div id="salary-edit-c" style="display:none;align-items:center;gap:8px">
+          <input style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;background:var(--bg3);border:1.5px solid var(--green);border-radius:10px;padding:6px 12px;color:var(--text);width:140px;outline:none" type="number" id="salary-input-c" value="1500" onkeydown="if(event.key==='Enter')confirmSalaryC()">
+          <button type="button" class="confirm-btn" onclick="confirmSalaryC()">✓</button>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <p class="stat-label" style="color:var(--gold)">Argent restant après dépenses fixes</p>
+      <p class="stat-amount" id="remaining-fixed-c" style="color:var(--gold)">—</p>
+      <p class="stat-sub" style="color:rgba(255,214,10,0.5)">Total fixes : <span id="total-fixed-c">—</span></p>
+    </div>
+    <div class="stat-card purple">
+      <p class="stat-label" style="color:var(--red)">Argent restant après tout</p>
+      <p class="stat-amount" id="remaining-all-c" style="color:var(--red)">—</p>
+      <p class="stat-sub" style="color:rgba(255,69,58,0.5)">Total variables : <span id="total-var-c">—</span></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="lists-grid">
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--gold)">Dépenses fixes</span>
+          <span class="list-badge" id="badge-fixed-c">0 / 0</span>
+        </div>
+        <div id="list-fixed-c"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--gold)">Nouvelle dépense fixe</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-fixed-c" maxlength="50" placeholder="Ex : Loyer, EDF..." onkeydown="if(event.key==='Enter')addFixedC()">
+            <input class="add-input amount-input" id="amount-fixed-c" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addFixedC()">
+          </div>
+          <button type="button" class="add-btn fixed" style="background:var(--gold);color:#000" onclick="addFixedC()">+ Ajouter dépense fixe</button>
+        </div>
+      </div>
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--red)">Dépenses variables</span>
+          <span class="list-badge" id="badge-var-c">0 / 0</span>
+        </div>
+        <div id="list-var-c"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--red)">Nouvelle dépense variable</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-var-c" maxlength="50" placeholder="Ex : Courses, Resto..." onkeydown="if(event.key==='Enter')addVarC()">
+            <input class="add-input amount-input" id="amount-var-c" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addVarC()">
+          </div>
+          <button type="button" class="add-btn variable" onclick="addVarC()">+ Ajouter dépense variable</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="page-marie" style="display:none" class="blur-target">
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="title-row" id="title-display-m">
+        <h1 id="title-text-m">Compte Marie</h1>
+        <div class="edit-icon" onclick="editTitleM()">✏️</div>
+        <div class="settings-btn" onclick="openSettings('marie')" title="Changer mon code">⚙️</div>
+      </div>
+      <div id="title-edit-m" style="display:none;align-items:center;gap:8px">
+        <input id="title-input-m" style="font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;background:var(--bg3);border:1.5px solid var(--blue);border-radius:10px;padding:6px 14px;color:var(--text);outline:none;width:280px;text-align:center" onkeydown="if(event.key==='Enter')confirmTitleM()">
+        <button type="button" class="confirm-btn" onclick="confirmTitleM()">✓</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card green">
+      <p class="stat-label" style="color:var(--green)">Salaire</p>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="salary-display-m" style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="editSalaryM()">
+          <p class="stat-amount" id="salary-text-m" style="color:var(--green)">—</p>
+          <div class="edit-icon">✏️</div>
+        </div>
+        <div id="salary-edit-m" style="display:none;align-items:center;gap:8px">
+          <input style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;background:var(--bg3);border:1.5px solid var(--green);border-radius:10px;padding:6px 12px;color:var(--text);width:140px;outline:none" type="number" id="salary-input-m" value="1500" onkeydown="if(event.key==='Enter')confirmSalaryM()">
+          <button type="button" class="confirm-btn" onclick="confirmSalaryM()">✓</button>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card gold">
+      <p class="stat-label" style="color:var(--gold)">Argent restant après dépenses fixes</p>
+      <p class="stat-amount" id="remaining-fixed-m" style="color:var(--gold)">—</p>
+      <p class="stat-sub" style="color:rgba(255,214,10,0.5)">Total fixes : <span id="total-fixed-m">—</span></p>
+    </div>
+    <div class="stat-card purple">
+      <p class="stat-label" style="color:var(--red)">Argent restant après tout</p>
+      <p class="stat-amount" id="remaining-all-m" style="color:var(--red)">—</p>
+      <p class="stat-sub" style="color:rgba(255,69,58,0.5)">Total variables : <span id="total-var-m">—</span></p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="lists-grid">
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--gold)">Dépenses fixes</span>
+          <span class="list-badge" id="badge-fixed-m">0 / 0</span>
+        </div>
+        <div id="list-fixed-m"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--gold)">Nouvelle dépense fixe</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-fixed-m" maxlength="50" placeholder="Ex : Loyer, EDF..." onkeydown="if(event.key==='Enter')addFixedM()">
+            <input class="add-input amount-input" id="amount-fixed-m" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addFixedM()">
+          </div>
+          <button type="button" class="add-btn fixed" style="background:var(--gold);color:#000" onclick="addFixedM()">+ Ajouter dépense fixe</button>
+        </div>
+      </div>
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--red)">Dépenses variables</span>
+          <span class="list-badge" id="badge-var-m">0 / 0</span>
+        </div>
+        <div id="list-var-m"></div>
+        <div class="add-section">
+          <p class="add-title" style="color:var(--red)">Nouvelle dépense variable</p>
+          <div class="add-row">
+            <input class="add-input name-input" id="label-var-m" maxlength="50" placeholder="Ex : Courses, Resto..." onkeydown="if(event.key==='Enter')addVarM()">
+            <input class="add-input amount-input" id="amount-var-m" type="number" placeholder="Montant €" onkeydown="if(event.key==='Enter')addVarM()">
+          </div>
+          <button type="button" class="add-btn variable" onclick="addVarM()">+ Ajouter dépense variable</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<div id="page-demo" style="display:none">
+<div class="app">
+
+  <div class="topbar">
+    <div>
+      <div class="title-row">
+        <h1>Démo — 2 300 €/mois</h1>
+      </div>
+      <p style="color:var(--text2);font-size:14px;text-align:center;margin-top:4px">Voici à quoi ressemble l'app avec de vrais chiffres</p>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card green">
+      <p class="stat-label" style="color:var(--green)">Salaire</p>
+      <p class="stat-amount" style="color:var(--green)">2 300 €</p>
+    </div>
+    <div class="stat-card gold">
+      <p class="stat-label" style="color:var(--gold)">Argent restant après dépenses fixes</p>
+      <p class="stat-amount" style="color:var(--gold)">1 015 €</p>
+      <p class="stat-sub" style="color:rgba(255,214,10,0.5)">Total fixes : 1 285 €</p>
+    </div>
+    <div class="stat-card purple">
+      <p class="stat-label" style="color:var(--red)">Argent restant après tout</p>
+      <p class="stat-amount" style="color:var(--green)">545 €</p>
+      <p class="stat-sub" style="color:rgba(255,69,58,0.5)">Total variables : 470 €</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="lists-grid">
+
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--gold)">Dépenses fixes</span>
+          <span class="list-badge">3 / 5</span>
+        </div>
+
+        <div class="expense-item paid-fixed">
+          <div class="check-btn" style="border-color:var(--green);background:var(--green)">✓</div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--green)">Loyer</p><p class="expense-status" style="color:rgba(48,209,88,0.55)">Payé ✓</p></div>
+          <p class="expense-amount" style="color:var(--green)">-750 €</p>
+        </div>
+        <div class="expense-item paid-fixed">
+          <div class="check-btn" style="border-color:var(--green);background:var(--green)">✓</div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--green)">Assurance voiture</p><p class="expense-status" style="color:rgba(48,209,88,0.55)">Payé ✓</p></div>
+          <p class="expense-amount" style="color:var(--green)">-85 €</p>
+        </div>
+        <div class="expense-item paid-fixed">
+          <div class="check-btn" style="border-color:var(--green);background:var(--green)">✓</div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--green)">Internet + Mobile</p><p class="expense-status" style="color:rgba(48,209,88,0.55)">Payé ✓</p></div>
+          <p class="expense-amount" style="color:var(--green)">-60 €</p>
+        </div>
+        <div class="expense-item unpaid-fixed">
+          <div class="check-btn" style="border-color:rgba(255,214,10,0.4)"></div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--gold)">EDF</p><p class="expense-status" style="color:rgba(255,214,10,0.55)">En attente</p></div>
+          <p class="expense-amount" style="color:var(--gold)">-90 €</p>
+        </div>
+        <div class="expense-item unpaid-fixed">
+          <div class="check-btn" style="border-color:rgba(255,214,10,0.4)"></div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--gold)">Abonnement salle</p><p class="expense-status" style="color:rgba(255,214,10,0.55)">En attente</p></div>
+          <p class="expense-amount" style="color:var(--gold)">-300 €</p>
+        </div>
+      </div>
+
+      <div>
+        <div class="list-header">
+          <span class="list-title" style="color:var(--red)">Dépenses variables</span>
+          <span class="list-badge">2 / 4</span>
+        </div>
+
+        <div class="expense-item paid-var">
+          <div class="check-btn" style="border-color:var(--purple);background:var(--purple)">✓</div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--purple)">Courses semaine 1</p><p class="expense-status" style="color:rgba(191,90,242,0.55)">Payé ✓</p></div>
+          <p class="expense-amount" style="color:var(--purple)">-120 €</p>
+        </div>
+        <div class="expense-item paid-var">
+          <div class="check-btn" style="border-color:var(--purple);background:var(--purple)">✓</div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--purple)">Essence</p><p class="expense-status" style="color:rgba(191,90,242,0.55)">Payé ✓</p></div>
+          <p class="expense-amount" style="color:var(--purple)">-80 €</p>
+        </div>
+        <div class="expense-item unpaid-var">
+          <div class="check-btn" style="border-color:rgba(255,69,58,0.4)"></div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--red)">Courses semaine 2</p><p class="expense-status" style="color:rgba(255,69,58,0.55)">En attente</p></div>
+          <p class="expense-amount" style="color:var(--red)">-120 €</p>
+        </div>
+        <div class="expense-item unpaid-var">
+          <div class="check-btn" style="border-color:rgba(255,69,58,0.4)"></div>
+          <div class="expense-info"><p class="expense-name" style="color:var(--red)">Resto anniversaire</p><p class="expense-status" style="color:rgba(255,69,58,0.55)">En attente</p></div>
+          <p class="expense-amount" style="color:var(--red)">-150 €</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+  // ---- UTILITAIRES ----
+  const fmt = v => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(v);
+
+  function loadData(key) {
+    try { const s = sessionStorage.getItem(key); return s ? JSON.parse(s) : null; } catch(e) { console.warn('[Budget] Erreur lecture sessionStorage (' + key + '):', e); return null; }
+  }
+
+  function clearLocalData() {
+    ['budget_data','budget_data_commun','budget_data_marie'].forEach(k => {
+      localStorage.removeItem(k); sessionStorage.removeItem(k);
+    });
+  }
+
+  // ---- CONSTANTES ----
+  const MAX_EXPENSE = 9999;  // montant max par dépense
+  const MAX_SALARY  = 99999; // salaire max
+
+  // ---- COMPTES (objet générique) ----
+  // Chaque compte = { key, suffix, defaultSalary, defaultFixed, defaultVar }
+  const ACCOUNTS = {
+    perso:  { key: 'budget_data',       suffix: '',   defaultSalary: 1500,
+              defaultFixed: [
+                { id: '1', label: 'Loyer',    amount: 650, paid: false },
+                { id: '2', label: 'EDF',      amount: 80,  paid: false },
+                { id: '3', label: 'Internet', amount: 30,  paid: false },
+              ],
+              defaultVar: [{ id: '4', label: 'Courses', amount: 200, paid: false }]
+            },
+    commun: { key: 'budget_data_commun', suffix: '-c', defaultSalary: 0, defaultFixed: [], defaultVar: [] },
+    marie:  { key: 'budget_data_marie',  suffix: '-m', defaultSalary: 0, defaultFixed: [], defaultVar: [] },
+  };
+
+  // État en mémoire pour chaque compte
+  const state = {};
+  for (const [id, cfg] of Object.entries(ACCOUNTS)) {
+    const saved = loadData(cfg.key);
+    state[id] = {
+      salary:   saved?.salary   ?? cfg.defaultSalary,
+      fixed:    saved?.fixed    ?? cfg.defaultFixed,
+      variable: saved?.variable ?? cfg.defaultVar,
+    };
+    const titleEl = document.getElementById('title-text' + cfg.suffix);
+    if (titleEl && saved?.title) titleEl.textContent = saved.title;
+  }
+
+  // ════════════════════════════════════════
+  //  COUCHE DONNÉES
+  // ════════════════════════════════════════
+
+  // ---- SAUVEGARDE ----
+  function saveAccount(id) {
+    const cfg = ACCOUNTS[id];
+    const s = state[id];
+    const titleEl = document.getElementById('title-text' + cfg.suffix);
+    try {
+      sessionStorage.setItem(cfg.key, JSON.stringify({
+        salary: s.salary, fixed: s.fixed, variable: s.variable,
+        title: titleEl ? titleEl.textContent : ''
+      }));
+    } catch(e) { console.error('[Budget] Erreur sauvegarde sessionStorage (' + id + '):', e); }
+    gdriveSave();
+  }
+
+  // ════════════════════════════════════════
+  //  COUCHE UI
+  // ════════════════════════════════════════
+
+  // ---- RENDU ----
+  function renderAccount(id) {
+    const cfg = ACCOUNTS[id];
+    const s   = state[id];
+    const sfx = cfg.suffix;
+
+    const totalFixed = s.fixed.reduce((a, e) => a + e.amount, 0);
+    const totalVar   = s.variable.reduce((a, e) => a + e.amount, 0);
+    const remFixed   = s.salary - totalFixed;
+    const remAll     = s.salary - totalFixed - totalVar;
+    const paidFixed  = s.fixed.filter(e => e.paid);
+    const paidVar    = s.variable.filter(e => e.paid);
+
+    document.getElementById('salary-text'     + sfx).textContent = fmt(s.salary);
+    document.getElementById('total-fixed'     + sfx).textContent = fmt(totalFixed);
+    document.getElementById('total-var'       + sfx).textContent = fmt(totalVar);
+    document.getElementById('badge-fixed'     + sfx).textContent = paidFixed.length + ' / ' + s.fixed.length;
+    document.getElementById('badge-var'       + sfx).textContent = paidVar.length   + ' / ' + s.variable.length;
+
+    const rfEl = document.getElementById('remaining-fixed' + sfx);
+    rfEl.textContent  = fmt(remFixed);
+    rfEl.style.color  = remFixed >= 0 ? 'var(--gold)' : 'var(--red)';
+
+    const raEl = document.getElementById('remaining-all' + sfx);
+    raEl.textContent  = fmt(remAll);
+    raEl.style.color  = remAll >= 0 ? 'var(--green)' : 'var(--red)';
+
+    renderList('list-fixed' + sfx, s.fixed,    'fixed', id);
+    renderList('list-var'   + sfx, s.variable, 'var',   id);
+  }
+
+  function renderList(containerId, items, type, accountId) {
+    const el = document.getElementById(containerId);
+    el.replaceChildren();
+    if (items.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'Aucune dépense';
+      el.appendChild(empty);
+      return;
+    }
+    items.forEach((e, i) => {
+      const cls  = (e.paid ? 'paid-' : 'unpaid-') + type;
+      const item = document.createElement('div');
+      item.className = 'expense-item ' + cls;
+      item.style.animationDelay = (i * 0.03) + 's';
+      item.addEventListener('click', () => toggleItem(accountId, e.id, type));
+
+      const check = document.createElement('div');
+      check.className = 'check-btn';
+      check.textContent = e.paid ? '✓' : '';
+
+      const info   = document.createElement('div');
+      info.className = 'expense-info';
+      const name   = document.createElement('p');
+      name.className = 'expense-name';
+      name.textContent = e.label;
+      const status = document.createElement('p');
+      status.className = 'expense-status';
+      status.textContent = e.paid ? 'Payé ✓' : 'En attente';
+      info.appendChild(name);
+      info.appendChild(status);
+
+      const amount = document.createElement('p');
+      amount.className = 'expense-amount';
+      amount.textContent = '-' + fmt(e.amount);
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'del-btn';
+      delBtn.textContent = '×';
+      delBtn.addEventListener('click', ev => { ev.stopPropagation(); deleteItem(accountId, e.id, type); });
+
+      item.appendChild(check);
+      item.appendChild(info);
+      item.appendChild(amount);
+      item.appendChild(delBtn);
+      el.appendChild(item);
+    });
+  }
+
+  // ════════════════════════════════════════
+  //  ACTIONS UTILISATEUR
+  // ════════════════════════════════════════
+
+  // ---- ACTIONS GÉNÉRIQUES ----
+  function toggleItem(accountId, id, type) {
+    const list = type === 'fixed' ? 'fixed' : 'variable';
+    state[accountId][list] = state[accountId][list].map(e => e.id === id ? {...e, paid: !e.paid} : e);
+    saveAccount(accountId);
+    renderAccount(accountId);
+  }
+
+  let pendingDelete = null;
+
+  function deleteItem(accountId, id, type) {
+    // First click: ask for confirmation
+    if (!pendingDelete || pendingDelete.id !== id) {
+      pendingDelete = { accountId, id, type };
+      showToast('Appuyez à nouveau pour confirmer la suppression', 'info');
+      setTimeout(() => { pendingDelete = null; }, 3000);
+      return;
+    }
+    // Second click: confirmed
+    pendingDelete = null;
+    const list = type === 'fixed' ? 'fixed' : 'variable';
+    state[accountId][list] = state[accountId][list].filter(e => e.id !== id);
+    saveAccount(accountId);
+    renderAccount(accountId);
+  }
+
+  function addItem(accountId, type) {
+    if (!ACCOUNTS[accountId]) { console.warn('[Budget] addItem: accountId inconnu:', accountId); return; }
+    const cfg  = ACCOUNTS[accountId];
+    const sfx  = cfg.suffix;
+    const pfx  = type === 'fixed' ? 'fixed' : 'var';
+    const labelEl  = document.getElementById('label-'  + pfx + sfx);
+    const amountEl = document.getElementById('amount-' + pfx + sfx);
+    const label  = labelEl.value.trim();
+    const rawAmount = amountEl.value.trim();
+    const amount = parseFloat(rawAmount);
+
+    // Validation label
+    if (!label) {
+      labelEl.classList.add('input-error');
+      setTimeout(() => labelEl.classList.remove('input-error'), 800);
+      showToast('⚠️ Le nom de la dépense est vide.', 'error');
+      labelEl.focus();
+      return;
+    }
+
+    // Validation montant — doit être un nombre décimal positif lisible
+    const isValidAmount = rawAmount !== ''
+      && !rawAmount.toLowerCase().includes('e') // pas de notation scientifique
+      && /^\d+([.,]\d{1,2})?$/.test(rawAmount.replace(',', '.')) // max 2 décimales
+      && !isNaN(amount) && isFinite(amount) && amount > 0;
+    if (!isValidAmount) {
+      amountEl.classList.add('input-error');
+      setTimeout(() => amountEl.classList.remove('input-error'), 800);
+      showToast('⚠️ Montant invalide — entrez un nombre positif (ex: 150 ou 9,99).', 'error');
+      amountEl.focus();
+      return;
+    }
+
+    // Montant max raisonnable
+    if (amount > MAX_EXPENSE) {
+      amountEl.classList.add('input-error');
+      setTimeout(() => amountEl.classList.remove('input-error'), 800);
+      showToast('⚠️ Montant trop élevé.', 'error');
+      amountEl.focus();
+      return;
+    }
+
+    const list = type === 'fixed' ? 'fixed' : 'variable';
+    state[accountId][list].push({
+      id: crypto.randomUUID(),
+      label: label.slice(0, 50),
+      amount: Math.round(amount * 100) / 100, // arrondi au centime
+      paid: false
+    });
+    labelEl.value  = '';
+    amountEl.value = '';
+    // Fermer le clavier sur mobile
+    labelEl.blur();
+    amountEl.blur();
+    document.activeElement?.blur();
+    saveAccount(accountId);
+    renderAccount(accountId);
+  }
+
+  function editSalaryFor(accountId) {
+    const sfx = ACCOUNTS[accountId].suffix;
+    document.getElementById('salary-display' + sfx).style.display = 'none';
+    document.getElementById('salary-edit'    + sfx).style.display = 'flex';
+    document.getElementById('salary-input'   + sfx).value = state[accountId].salary;
+    document.getElementById('salary-input'   + sfx).focus();
+  }
+
+  function confirmSalaryFor(accountId) {
+    const sfx = ACCOUNTS[accountId].suffix;
+    const inputEl = document.getElementById('salary-input' + sfx);
+    const val = parseFloat(inputEl.value.replace(',', '.').replace(/\s/g, ''));
+    if (isNaN(val) || !isFinite(val) || val <= 0 || val > MAX_SALARY) {
+      inputEl.classList.add('input-error');
+      setTimeout(() => inputEl.classList.remove('input-error'), 800);
+      showToast('⚠️ Salaire invalide — entre un nombre positif.', 'error');
+      return;
+    }
+    state[accountId].salary = Math.round(val * 100) / 100;
+    document.getElementById('salary-display' + sfx).style.display = 'flex';
+    document.getElementById('salary-edit'    + sfx).style.display = 'none';
+    saveAccount(accountId); renderAccount(accountId);
+  }
+
+  function editTitleFor(accountId) {
+    const sfx = ACCOUNTS[accountId].suffix;
+    document.getElementById('title-display' + sfx).style.display = 'none';
+    document.getElementById('title-edit'    + sfx).style.display = 'flex';
+    document.getElementById('title-input'   + sfx).value = document.getElementById('title-text' + sfx).textContent;
+    document.getElementById('title-input'   + sfx).focus();
+  }
+
+  function confirmTitleFor(accountId) {
+    const sfx = ACCOUNTS[accountId].suffix;
+    const val = document.getElementById('title-input' + sfx).value.trim();
+    if (val) document.getElementById('title-text' + sfx).textContent = val.slice(0, 100);
+    document.getElementById('title-display' + sfx).style.display = 'flex';
+    document.getElementById('title-edit'    + sfx).style.display = 'none';
+    saveAccount(accountId);
+  }
+
+  // ════════════════════════════════════════
+  //  ALIASES HTML (onclick existants)
+  // ════════════════════════════════════════
+
+  // ---- COMPATIBILITÉ HTML (les onclick existants utilisent les anciens noms) ----
+  const addFixed  = () => addItem('perso',  'fixed');
+  const addVar    = () => addItem('perso',  'var');
+  const addFixedC = () => addItem('commun', 'fixed');
+  const addVarC   = () => addItem('commun', 'var');
+  const addFixedM = () => addItem('marie',  'fixed');
+  const addVarM   = () => addItem('marie',  'var');
+  const editSalary    = () => editSalaryFor('perso');
+  const editSalaryC   = () => editSalaryFor('commun');
+  const editSalaryM   = () => editSalaryFor('marie');
+  const confirmSalary  = () => confirmSalaryFor('perso');
+  const confirmSalaryC = () => confirmSalaryFor('commun');
+  const confirmSalaryM = () => confirmSalaryFor('marie');
+  const editTitle     = () => editTitleFor('perso');
+  const editTitleC    = () => editTitleFor('commun');
+  const editTitleM    = () => editTitleFor('marie');
+  const confirmTitle  = () => confirmTitleFor('perso');
+  const confirmTitleC = () => confirmTitleFor('commun');
+  const confirmTitleM = () => confirmTitleFor('marie');
+
+  // ════════════════════════════════════════
+  //  NAVIGATION
+  // ════════════════════════════════════════
+
+  // ---- ONGLETS ----
+  function switchTab(tab) {
+    pendingDelete = null; // annuler toute suppression en attente
+    ['perso','commun','marie','demo'].forEach(t => {
+      document.getElementById('page-' + t).style.display = tab === t ? 'block' : 'none';
+      const tabEl = document.getElementById('tab-' + t);
+      if (tabEl) tabEl.classList.toggle('active', tab === t);
+    });
+    if (['perso','commun','marie'].includes(tab)) renderAccount(tab);
+  }
+
+  // Rendu initial
+  renderAccount('perso');
+  renderAccount('commun');
+  renderAccount('marie');
+
+  // ════════════════════════════════════════
+  //  SÉCURITÉ — VERROUILLAGE / PIN
+  // ════════════════════════════════════════
+
+  // ---- LOCK / UNLOCK ----
+  // Les codes sont hachés avec SHA-256 + sel aléatoire.
+  // Le code en clair n'est pas stocké, ce qui complique une attaque par dictionnaire,
+  // mais cette protection reste légère — suffisant pour un usage personnel.
+  const SALT_YOANN = '095cfaf8fc2155d613ee25536ea511e7';
+  const HASH_YOANN = '80d41025b483dc36067faf9c0a861b9f80257eebf8a9950213037411a1294186';
+  const SALT_MARIE = 'ba061e4c2387dd81cf4a26327a77e36f';
+  const HASH_MARIE = '0ecd459da3ffc7eef8c172138f686ac763f500e18f0bdc743e57f75ac1119498';
+  let currentUser = null; // 'yoann' ou 'marie'
+
+  async function sha256(str, salt = '') {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + str));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function blurAll() {
+    document.querySelectorAll('.blur-target').forEach(el => el.classList.add('blurred'));
+  }
+
+  // Protection brute force : max 5 tentatives, blocage 30s
+  let pinAttempts = 0;
+  let pinLockedUntil = 0;
+
+  async function tryUnlock() {
+    const now = Date.now();
+    if (now < pinLockedUntil) {
+      const remaining = Math.ceil((pinLockedUntil - now) / 1000);
+      document.getElementById('pin-error').textContent = `Trop de tentatives — réessayez dans ${remaining}s`;
+      return;
+    }
+
+    const pin = document.getElementById('pin-input').value;
+    const input = document.getElementById('pin-input');
+    if (!pin.trim()) { input.focus(); return; } // ignorer les tentatives vides
+    const hashY = await sha256(pin, localStorage.getItem('budget_salt_yoann') || SALT_YOANN);
+    const hashM = await sha256(pin, localStorage.getItem('budget_salt_marie') || SALT_MARIE);
+
+    if (hashY === localStorage.getItem('budget_pin_yoann') || (hashY === HASH_YOANN && !localStorage.getItem('budget_pin_yoann'))) {
+      currentUser = 'yoann';
+      currentPinYoann = pin;
+      pinAttempts = 0; pinLockedUntil = 0;
+      document.getElementById('lock-overlay').style.display = 'none';
+      document.getElementById('sync-bar').style.display = 'flex';
+      // Déflou uniquement Yoann + Patate
+      document.getElementById('page-perso').classList.remove('blurred');
+      document.getElementById('page-commun').classList.remove('blurred');
+      // Montrer onglets Yoann + Patate, cacher Marie
+      document.getElementById('tab-perso').style.display = 'block';
+      document.getElementById('tab-commun').style.display = 'block';
+      document.getElementById('tab-marie').style.display = 'none';
+      document.getElementById('tab-demo').style.display = 'block';
+      switchTab('perso');
+    } else if (hashM === localStorage.getItem('budget_pin_marie') || (hashM === HASH_MARIE && !localStorage.getItem('budget_pin_marie'))) {
+      currentUser = 'marie';
+      currentPinMarie = pin;
+      pinAttempts = 0; pinLockedUntil = 0;
+      document.getElementById('lock-overlay').style.display = 'none';
+      document.getElementById('sync-bar').style.display = 'flex';
+      // Déflou uniquement Marie + Patate
+      document.getElementById('page-marie').classList.remove('blurred');
+      document.getElementById('page-commun').classList.remove('blurred');
+      // Montrer onglets Marie + Patate, cacher Yoann
+      document.getElementById('tab-perso').style.display = 'none';
+      document.getElementById('tab-commun').style.display = 'block';
+      document.getElementById('tab-marie').style.display = 'block';
+      document.getElementById('tab-demo').style.display = 'block';
+      switchTab('marie');
+    } else {
+      pinAttempts++;
+      // Note: impossible de détecter les codes identiques ici (sels différents → hashes différents)
+      if (pinAttempts >= 5) {
+        pinLockedUntil = Date.now() + 30000;
+        pinAttempts = 0;
+        input.classList.add('error');
+        document.getElementById('pin-error').textContent = 'Trop de tentatives — bloqué 30s';
+        document.getElementById('pin-input').value = '';
+        setTimeout(() => { input.classList.remove('error'); document.getElementById('pin-error').textContent = ''; }, 30000);
+      } else {
+        input.classList.add('error');
+        document.getElementById('pin-error').textContent = `Code incorrect — ${5 - pinAttempts} essai(s) restant(s)`;
+        document.getElementById('pin-input').value = '';
+        setTimeout(() => { input.classList.remove('error'); document.getElementById('pin-error').textContent = ''; }, 1000);
+      }
+    }
+  }
+
+  function showDemo() {
+    document.getElementById('lock-overlay').style.display = 'none';
+    switchTab('demo');
+  }
+
+  // Init: blur sensitive content on load
+  window.addEventListener('load', () => {
+    // Nettoyer les anciennes clés localStorage budget (remplacées par sessionStorage)
+    ['budget_data','budget_data_commun','budget_data_marie'].forEach(k => localStorage.removeItem(k));
+    document.getElementById('settings-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeSettings();
+    });
+    blurAll();
+    document.getElementById('page-perso').style.display = 'none';
+    document.getElementById('page-commun').style.display = 'none';
+    document.getElementById('page-marie').style.display = 'none';
+    document.getElementById('page-demo').style.display = 'none';
+    document.getElementById('tab-perso').classList.remove('active');
+  });
+
+
+  // ════════════════════════════════════════
+  //  PARAMÈTRES — CHANGEMENT DE CODE
+  // ════════════════════════════════════════
+
+  // ---- SETTINGS / CHANGE PIN ----
+  let settingsUser = null;
+
+  function openSettings(user) {
+    settingsUser = user;
+    document.getElementById('settings-old').value = '';
+    document.getElementById('settings-new1').value = '';
+    document.getElementById('settings-new2').value = '';
+    document.getElementById('settings-err').textContent = '';
+    document.getElementById('settings-ok').textContent = '';
+    ['settings-old','settings-new1','settings-new2'].forEach(id => {
+      document.getElementById(id).classList.remove('ok','error');
+    });
+    document.getElementById('settings-sub').textContent =
+      user === 'yoann' ? 'Changer le code du Compte Yoann' : 'Changer le code du Compte Marie';
+    document.getElementById('settings-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('settings-old').focus(), 100);
+  }
+
+  function closeSettings() {
+    document.getElementById('settings-overlay').classList.remove('open');
+    settingsUser = null;
+  }
+
+  async function saveNewPin() {
+    const oldVal  = document.getElementById('settings-old').value;
+    const new1    = document.getElementById('settings-new1').value;
+    const new2    = document.getElementById('settings-new2').value;
+    const errEl   = document.getElementById('settings-err');
+    const okEl    = document.getElementById('settings-ok');
+    errEl.textContent = '';
+    okEl.textContent  = '';
+
+    if (!oldVal || !new1 || !new2) {
+      errEl.textContent = 'Remplissez tous les champs';
+      return;
+    }
+    if (new1.length < 4) {
+      errEl.textContent = 'Le code doit faire au moins 4 caractères';
+      document.getElementById('settings-new1').classList.add('error');
+      setTimeout(() => document.getElementById('settings-new1').classList.remove('error'), 1000);
+      return;
+    }
+    if (new1 !== new2) {
+      errEl.textContent = 'Les deux nouveaux codes ne correspondent pas';
+      document.getElementById('settings-new2').classList.add('error');
+      setTimeout(() => document.getElementById('settings-new2').classList.remove('error'), 1000);
+      return;
+    }
+
+    const saltKey    = settingsUser === 'yoann' ? 'budget_salt_yoann' : 'budget_salt_marie';
+    const storedKey  = settingsUser === 'yoann' ? 'budget_pin_yoann'  : 'budget_pin_marie';
+    const currentSalt = localStorage.getItem(saltKey) || (settingsUser === 'yoann' ? SALT_YOANN : SALT_MARIE);
+    const defaultHash = settingsUser === 'yoann' ? HASH_YOANN : HASH_MARIE;
+    const oldHash    = await sha256(oldVal, currentSalt);
+    const currentHash = localStorage.getItem(storedKey) || defaultHash;
+
+    if (oldHash !== currentHash) {
+      errEl.textContent = 'Ancien code incorrect';
+      document.getElementById('settings-old').classList.add('error');
+      document.getElementById('settings-old').value = '';
+      setTimeout(() => document.getElementById('settings-old').classList.remove('error'), 1000);
+      return;
+    }
+
+    // Générer un nouveau sel unique à chaque changement de code
+    // Vérifier que le nouveau code ne correspond pas au code de l'autre compte
+    const otherSaltKey   = settingsUser === 'yoann' ? 'budget_salt_marie'  : 'budget_salt_yoann';
+    const otherStoredKey = settingsUser === 'yoann' ? 'budget_pin_marie'   : 'budget_pin_yoann';
+    const otherDefaultHash = settingsUser === 'yoann' ? HASH_MARIE : HASH_YOANN;
+    const otherDefaultSalt = settingsUser === 'yoann' ? SALT_MARIE : SALT_YOANN;
+    const otherSalt = localStorage.getItem(otherSaltKey) || otherDefaultSalt;
+    const newHashWithOtherSalt = await sha256(new1, otherSalt);
+    const otherCurrentHash = localStorage.getItem(otherStoredKey) || otherDefaultHash;
+    if (newHashWithOtherSalt === otherCurrentHash) {
+      errEl.textContent = 'Ce code est déjà utilisé par l\'autre compte — choisissez-en un différent';
+      return;
+    }
+
+    const newSalt = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map(b => b.toString(16).padStart(2, '0')).join('');
+    const newHash = await sha256(new1, newSalt);
+    localStorage.setItem(saltKey, newSalt);
+    localStorage.setItem(storedKey, newHash);
+    okEl.textContent = '✅ Code changé avec succès !';
+    ['settings-old','settings-new1','settings-new2'].forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).classList.add('ok');
+    });
+    setTimeout(() => closeSettings(), 1500);
+  }
+
+
+  // ════════════════════════════════════════
+  //  CHIFFREMENT AES-256-GCM
+  // ════════════════════════════════════════
+
+  // Dérive une clé AES-256 depuis un PIN + sel
+  async function deriveKey(pin, salt) {
+    const enc = new TextEncoder();
+    const keyMaterial = await crypto.subtle.importKey(
+      'raw', enc.encode(pin), 'PBKDF2', false, ['deriveKey']
+    );
+    return crypto.subtle.deriveKey(
+      { name: 'PBKDF2', salt: enc.encode(salt), iterations: 100000, hash: 'SHA-256' },
+      keyMaterial,
+      { name: 'AES-GCM', length: 256 },
+      false,
+      ['encrypt', 'decrypt']
+    );
+  }
+
+  // Chiffre un objet JS → string base64
+  async function encryptData(obj, pin, salt) {
+    const key = await deriveKey(pin, salt);
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const encoded = new TextEncoder().encode(JSON.stringify(obj));
+    const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+    // Concatène IV + données chiffrées en base64
+    const combined = new Uint8Array(iv.length + cipher.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(cipher), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  }
+
+  // Déchiffre une string base64 → objet JS
+  async function decryptData(b64, pin, salt) {
+    const combined = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const iv = combined.slice(0, 12);
+    const cipher = combined.slice(12);
+    const key = await deriveKey(pin, salt);
+    const decoded = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipher);
+    return JSON.parse(new TextDecoder().decode(decoded));
+  }
+
+  // Récupère le PIN actuel d'un utilisateur (pour chiffrement)
+  // On utilise le PIN brut saisi — on le stocke temporairement en mémoire après login
+  let currentPinYoann = null;
+  let currentPinMarie = null;
+
+  // ════════════════════════════════════════
+  //  SYNCHRONISATION GOOGLE DRIVE
+  // ════════════════════════════════════════
+
+  // ---- GOOGLE DRIVE SYNC ----
+  const GDRIVE_CLIENT_ID = '371141707686-cc2oiplm74o6e0280tlufs07jilaqrd9.apps.googleusercontent.com';
+  const GDRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
+  const GDRIVE_FILE  = 'budget_sync.json';
+  let gdriveReady = false;
+  let gdriveFileId = null;
+  let gdriveToken  = null;
+  let syncTimeout  = null;
+  let tokenClient  = null;
+
+  function setSyncStatus(syncState, label) {
+    const dot = document.getElementById('sync-dot');
+    const lbl = document.getElementById('sync-label');
+    if (dot) dot.className = 'sync-dot ' + syncState;
+    if (lbl) lbl.textContent = label;
+  }
+
+  function gdriveAuth() {
+    if (typeof google === 'undefined') {
+      showToast('⚠️ API Google non chargée, réessaie dans quelques secondes.', 'error');
+      return;
+    }
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: GDRIVE_CLIENT_ID,
+      scope: GDRIVE_SCOPE,
+      callback: async (resp) => {
+        if (resp.error) {
+          setSyncStatus('error', 'Erreur connexion');
+          console.error('[Budget] Erreur connexion Google Drive:', resp);
+          return;
+        }
+        gdriveToken = resp.access_token;
+        gdriveReady = true;
+        localStorage.setItem('gdrive_authorized', '1'); // evite les ecrans consent Google
+        const btn = document.getElementById('gdrive-btn');
+        btn.className = 'gdrive-btn connected';
+        btn.textContent = '✅ Google Drive connecté';
+        setSyncStatus('syncing', 'Chargement...');
+        await gdriveLoad();
+      }
+    });
+    // 'consent' uniquement à la toute première autorisation, '' ensuite
+    const alreadyAuthorized = localStorage.getItem('gdrive_authorized') === '1';
+    tokenClient.requestAccessToken({ prompt: alreadyAuthorized ? '' : 'consent' });
+  }
+
+  // ════════════════════════════════════════
+  //  VALIDATION
+  // ════════════════════════════════════════
+
+  // ---- VALIDATION DES DONNÉES ----
+  function validateAccount(data) {
+    if (!data || typeof data !== 'object') return null;
+    const salary = typeof data.salary === 'number' && isFinite(data.salary) && data.salary >= 0
+      ? data.salary : 0;
+    const title = typeof data.title === 'string' ? data.title.slice(0, 100) : '';
+    const validateItems = (arr) => {
+      if (!Array.isArray(arr)) return [];
+      return arr.filter(e =>
+        e && typeof e === 'object' &&
+        typeof e.label === 'string' && e.label.trim() !== '' &&
+        typeof e.amount === 'number' && isFinite(e.amount) && e.amount >= 0 && e.amount <= MAX_EXPENSE &&
+        typeof e.paid === 'boolean' &&
+        (typeof e.id === 'number' || typeof e.id === 'string')
+      ).map(e => ({
+        id: e.id,
+        label: e.label.slice(0, 50),
+        amount: Math.round(e.amount * 100) / 100,
+        paid: e.paid
+      }));
+    };
+    return {
+      salary,
+      title,
+      fixed: validateItems(data.fixed),
+      variable: validateItems(data.variable)
+    };
+  }
+
+  function applyAccountData(validated, accountId) {
+    if (!validated || !ACCOUNTS[accountId]) return false;
+    state[accountId].salary   = validated.salary;
+    state[accountId].fixed    = validated.fixed;
+    state[accountId].variable = validated.variable;
+    if (validated.title) {
+      const sfx = ACCOUNTS[accountId].suffix;
+      const el = document.getElementById('title-text' + sfx);
+      if (el) el.textContent = validated.title;
+    }
+    saveAccount(accountId);
+    renderAccount(accountId);
+    return true;
+  }
+
+  async function gdriveLoad() {
+    try {
+      setSyncStatus('syncing', 'Chargement...');
+      const listRes = await fetch(
+        "https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name%3D'" + GDRIVE_FILE + "'&fields=files(id,name)",
+        { headers: { 'Authorization': 'Bearer ' + gdriveToken } }
+      );
+      if (!listRes.ok) throw new Error('[Budget] Drive list échoué: ' + listRes.status);
+      const listData = await listRes.json();
+      const files = listData.files;
+
+      if (files && files.length > 0) {
+        gdriveFileId = files[0].id;
+        const dl = await fetch(
+          'https://www.googleapis.com/drive/v3/files/' + gdriveFileId + '?alt=media',
+          { headers: { 'Authorization': 'Bearer ' + gdriveToken } }
+        );
+        if (!dl.ok) throw new Error('[Budget] Drive download échoué: ' + dl.status);
+        const data = await dl.json();
+        if (data.encrypted) {
+          // Données chiffrées — déchiffre avec le PIN de l'utilisateur connecté
+          const pinY = currentPinYoann || '';
+          const pinM = currentPinMarie || '';
+          const pinC = currentUser === 'yoann' ? pinY : pinM;
+          const results = await Promise.allSettled([
+            decryptData(data.perso,  pinY, 'perso'),
+            decryptData(data.commun, pinC, 'commun'),
+            decryptData(data.marie,  pinM, 'marie'),
+          ]);
+          if (results[0].status === 'fulfilled') applyAccountData(validateAccount(results[0].value), 'perso');
+          if (results[1].status === 'fulfilled') applyAccountData(validateAccount(results[1].value), 'commun');
+          if (results[2].status === 'fulfilled') applyAccountData(validateAccount(results[2].value), 'marie');
+        } else {
+          // Données non chiffrées (migration depuis ancienne version)
+          applyAccountData(validateAccount(data.perso),  'perso');
+          applyAccountData(validateAccount(data.commun), 'commun');
+          applyAccountData(validateAccount(data.marie),  'marie');
+        }
+        setSyncStatus('synced', 'Synchronisé ✓');
+      } else {
+        setSyncStatus('synced', 'Prêt (nouveau fichier)');
+        await gdriveSave();
+      }
+    } catch(e) {
+      setSyncStatus('error', 'Erreur de chargement');
+      console.error('[Budget] Erreur chargement Google Drive:', e);
+      showToast('⚠️ Impossible de charger les données Drive. Vérifie ta connexion.', 'error');
+    }
+  }
+
+  async function gdriveSave() {
+    if (!gdriveReady || !gdriveToken) return;
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(async () => {
+      try {
+        setSyncStatus('syncing', 'Sauvegarde...');
+        const buildAccount = (id) => {
+          const sfx = ACCOUNTS[id].suffix;
+          const titleEl = document.getElementById('title-text' + sfx);
+          return { ...state[id], title: titleEl ? titleEl.textContent : '' };
+        };
+        // Chiffre chaque compte avec le PIN de son propriétaire
+        const pinY = currentPinYoann || '';
+        const pinM = currentPinMarie || '';
+        const pinC = currentUser === 'yoann' ? pinY : pinM;
+        const [encPerso, encCommun, encMarie] = await Promise.all([
+          encryptData(buildAccount('perso'),  pinY, 'perso'),
+          encryptData(buildAccount('commun'), pinC, 'commun'),
+          encryptData(buildAccount('marie'),  pinM, 'marie'),
+        ]);
+        const data = {
+          perso:  encPerso,
+          commun: encCommun,
+          marie:  encMarie,
+          encrypted: true,
+          lastSave: new Date().toISOString()
+        };
+        const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+        const token = gdriveToken;
+
+        if (gdriveFileId) {
+          const patchRes = await fetch('https://www.googleapis.com/upload/drive/v3/files/' + gdriveFileId + '?uploadType=media', {
+            method: 'PATCH',
+            headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+            body: blob
+          });
+          if (!patchRes.ok) throw new Error('[Budget] Drive PATCH échoué: ' + patchRes.status);
+        } else {
+          const meta = JSON.stringify({ name: GDRIVE_FILE, parents: ['appDataFolder'] });
+          const form = new FormData();
+          form.append('metadata', new Blob([meta], { type: 'application/json' }));
+          form.append('file', blob);
+          const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + token },
+            body: form
+          });
+          if (!res.ok) throw new Error('[Budget] Drive POST échoué: ' + res.status);
+          const result = await res.json();
+          gdriveFileId = result.id;
+        }
+        setSyncStatus('synced', 'Sauvegardé ✓ ' + new Date().toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}));
+      } catch(e) {
+        setSyncStatus('error', 'Erreur de sauvegarde');
+        console.error('[Budget] Erreur sauvegarde Google Drive:', e);
+        showToast('⚠️ Sauvegarde Drive échouée. Tes données sont en mémoire locale.', 'error');
+      }
+    }, 1500);
+  }
+
+  function logoutApp() {
+    clearLocalData(); // Note: budget_pin_* et budget_salt_* sont conservés intentionnellement (PIN persiste entre sessions)
+    // Révoquer le token Google si connecté
+    if (gdriveToken && typeof google !== 'undefined') google.accounts.oauth2.revoke(gdriveToken);
+    gdriveToken = null;
+    gdriveReady = false;
+    gdriveFileId = null;
+    currentUser = null;
+    currentPinYoann = null;
+    currentPinMarie = null;
+    // Recharger la page proprement
+    window.location.reload();
+  }
+
+  // ════════════════════════════════════════
+  //  NOTIFICATIONS
+  // ════════════════════════════════════════
+
+  // ---- TOAST NOTIFICATIONS ----
+  let toastTimer = null;
+  function showToast(msg, type = 'info') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast ' + type;
+    clearTimeout(toastTimer);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => { el.classList.add('show'); });
+    });
+    toastTimer = setTimeout(() => { el.classList.remove('show'); }, 3500);
+  }
+
+</script>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-box">
+    <div style="font-size:36px;margin-bottom:12px">⚙️</div>
+    <h2>Changer mon code</h2>
+    <p class="sub" id="settings-sub">Entrez votre ancien code puis votre nouveau code</p>
+
+    <label class="settings-label">Ancien code</label>
+    <input class="settings-input" type="password" id="settings-old" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('settings-new1').focus()">
+
+    <label class="settings-label" style="margin-top:4px">Nouveau code</label>
+    <input class="settings-input" type="password" id="settings-new1" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')document.getElementById('settings-new2').focus()">
+
+    <label class="settings-label" style="margin-top:4px">Confirmer le nouveau code</label>
+    <input class="settings-input" type="password" id="settings-new2" maxlength="6" placeholder="••••" autocomplete="off" onkeydown="if(event.key==='Enter')saveNewPin()">
+
+    <div class="settings-err" id="settings-err"></div>
+    <div class="settings-success" id="settings-ok"></div>
+
+    <button type="button" class="settings-save-btn" onclick="saveNewPin()">💾 Enregistrer</button>
+    <button type="button" class="settings-cancel-btn" onclick="closeSettings()">Annuler</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+</body>
+</html>
